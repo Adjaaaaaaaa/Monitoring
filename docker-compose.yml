@@ -1,0 +1,31 @@
+services:
+  # Service de l'API (FastAPI)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Synchronise les modèles pour pouvoir les mettre à jour sans rebuild
+      - ./api/data_models:/app/api/data_models
+      # Permet de récupérer les fichiers de logs/résultats sur votre PC
+      - ./api/logs:/app/api/logs
+    restart: always
+
+  # Service de l'Interface (Streamlit)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    environment:
+      # URL interne à Docker pour contacter l'API
+      - API_URL=http://backend:8000
+    volumes:
+      # Optionnel : synchronise le code de l'interface pour le développement en direct
+      - ./Interface.py:/app/Interface.py
+    restart: always
