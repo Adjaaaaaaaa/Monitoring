@@ -1,0 +1,11 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+RUN pip install streamlit requests
+
+COPY Interface.py .
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "Interface.py", "--host", "0.0.0.0", "--port", "8501"]

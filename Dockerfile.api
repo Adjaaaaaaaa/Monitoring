@@ -7,18 +7,23 @@ WORKDIR /app
 # Installation des dépendances système nécessaires pour XGBoost
 RUN apt-get update && apt-get install -y libgomp1 && rm -rf /var/lib/apt/lists/*
 
-# Copie et installation des bibliothèques Python
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Installation de uv
+RUN pip install uv
+
+# Copie et installation des bibliothèques Python avec uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen
+RUN uv add prometheus-client prometheus-fastapi-instrumentator psycopg2-binary
 
 # Copie du dossier api et des dossiers de données nécessaires
 COPY api/ ./api/
 
 # Variable d'environnement pour Python
 ENV PYTHONPATH=/app/api
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Port exposé par FastAPI
 EXPOSE 8000
 
 # Commande de lancement
-CMD ["python", "api/run.py"]
+CMD ["uvicorn", "api.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
