@@ -18,34 +18,73 @@ Pour concevoir des dashboards efficaces, il faut d'abord analyser :
 
 ## Dashboards Implémentés
 
-### 1. HTTP Overview Dashboard
-**Public**: Équipe SRE, Développeurs
-**Objectif**: Surveillance temps réel de l'API
+### 1. Simple Business Dashboard
+**UID** : `simple-business`
+**Objectif** : Vue claire des métriques métier essentiels
+**Public cible** : Apprenants débutants
+**Panels** (4) :
+- Total Predictions (Time series)
+- Health Checks Total (Time series)  
+- Application Uptime (Stat)
+- HTTP Requests per Second (Time series)
 
-**Panels**:
-- **Requêtes/seconde** (Time Series) - Volume de trafic
-- **Latence P95** (Time Series) - Performance des requêtes
-- **Taux d'erreur** (Stat) - Disponibilité
-- **Requêtes en cours** (Gauge) - Charge actuelle
-- **CPU Usage %** (Time Series) - Ressources système
-- **Memory Usage %** (Gauge) - Ressources système
+**Métriques utilisées** :
+- `predictions_total{success="True"}`
+- `health_checks_total`
+- `app_uptime_seconds`
+- `rate(http_requests_total[5m])`
 
-**Justification**: Couvre les métriques essentielles RED (Rate, Errors, Duration) + infrastructure
+### 2. Simple HTTP Dashboard  
+**UID** : `simple-http`
+**Objectif** : Infrastructure essentielle et monitoring de base
+**Public cible** : Apprenants débutants
+**Panels** (4) :
+- HTTP Requests per Second (Time series)
+- Total HTTP Requests (Time series)
+- Memory Usage % (Stat)
+- CPU Usage % (Stat)
 
-### 2. Business Metrics Dashboard
-**Public**: Product Owners, Management
-**Objectif**: KPI métier et utilisation
+**Métriques utilisées** :
+- `rate(http_requests_total[5m])`
+- `http_requests_total`
+- `(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100`
+- `100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100`
 
-**Panels**:
-- **Prédictions/seconde** (Time Series) - Volume d'activité
-- **Application Uptime** (Stat) - Disponibilité
-- **Health checks/seconde** (Time Series) - Surveillance
-- **Erreurs par type** (Time Series) - Qualité
-- **Latence prédictions P95** (Time Series) - Performance métier
-- **Distribution âges** (Time Series) - Profil utilisateurs
-- **Distribution vitesses** (Time Series) - Contexte trafic
+### 3. Business Metrics Dashboard
+**UID** : `business-metrics`
+**Objectif** : Métriques détaillées avec latence et erreurs
+**Public cible** : Apprenants avancés
+**Panels** (6) :
+- Predictions per Second (Time series)
+- Application Uptime (Stat)
+- Health Checks per Second (Time series)
+- HTTP Errors by Type (Time series)
+- Prediction Latency P95 (Time series)
+- Total Predictions (Stat)
 
-**Justification**: Focus sur les métriques métier et l'expérience utilisateur
+**Métriques utilisées** :
+- `rate(predictions_total{success="True"}[5m])`
+- `app_uptime_seconds`
+- `rate(health_checks_total[5m])`
+- `rate(http_errors_total[5m])`
+- `histogram_quantile(0.95, rate(model_prediction_duration_seconds_bucket[5m]))`
+- `predictions_total{success="True"}`
+
+### 4. HTTP Overview Dashboard
+**UID** : `http-overview`
+**Objectif** : Vue complète HTTP avec erreurs et infrastructure
+**Public cible** : Équipes SRE/Production
+**Panels** (4) :
+- HTTP Requests per Second (Time series)
+- HTTP Error Rate (Time series)
+- Memory Usage % (Stat)
+- CPU Usage % (Stat)
+
+**Métriques utilisées** :
+- `rate(http_requests_total[5m])`
+- `rate(http_requests_total{status!~"2.."}[5m])`
+- `(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100`
+- `100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100`
 
 ## Recommandations de Design
 
