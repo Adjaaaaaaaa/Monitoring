@@ -1,7 +1,23 @@
 [project]
-name = "monitoring"
+name = "monitoring-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "Project combining a FastAPI backend and a Streamlit frontend."
 readme = "README.md"
-requires-python = ">=3.14"
-dependencies = []
+requires-python = ">=3.12"
+
+# Dependencies for both the API and the frontend
+# uv will install all of these into the virtual environment
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pandas",
+    "joblib",
+    "scikit-learn==1.8.0",
+    "streamlit",
+    "requests",
+    "xgboost",
+    "seaborn>=0.13.2",
+    "prometheus-client",
+    "prometheus-fastapi-instrumentator",
+    "psycopg2-binary",
+]
